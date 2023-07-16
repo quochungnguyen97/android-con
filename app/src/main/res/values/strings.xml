@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Java Con</string>
+    <string name="dump_data">Dump data</string>
+    <string name="refresh">Refresh</string>
+</resources>
