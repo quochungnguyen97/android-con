@@ -2,6 +2,7 @@ package com.rooze.javacon
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -55,7 +56,11 @@ class MainActivity : AppCompatActivity() {
         val disposable = Observable.create { emitter ->
             emitter.onNext(accountDao.getAll())
             emitter.onComplete()
-        }.map { list -> list.take(4) }.subscribeOn(Schedulers.io())
+        }.flatMap { list -> Observable.create { emitter ->
+            emitter.onNext(list.take(5))
+            SystemClock.sleep(3000)
+            emitter.onNext(list)
+        } }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ list ->
                 Log.i(TAG, "loadData: ${list.size}")
