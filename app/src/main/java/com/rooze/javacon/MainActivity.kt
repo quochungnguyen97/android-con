@@ -13,6 +13,7 @@ import com.rooze.javacon.room.AppDatabase
 import com.rooze.javacon.room.dumpData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var adapter: AppAdapter
+
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
-        Observable.create { emitter ->
+        val disposable = Observable.create { emitter ->
             emitter.onNext(accountDao.getAll())
             emitter.onComplete()
         }.subscribeOn(Schedulers.io())
@@ -60,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                 progressBar.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
             }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
+        compositeDisposable.add(disposable)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -79,5 +83,10 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.clear()
     }
 }
