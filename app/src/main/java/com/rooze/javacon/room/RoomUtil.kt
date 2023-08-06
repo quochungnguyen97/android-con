@@ -10,14 +10,13 @@ import java.util.*
 
 fun dumpData(accountDao: AccountDao, context: Context) {
     CoroutineScope(Dispatchers.IO).launch {
-        repeat(10000) {
-            accountDao.upsert(
-                AccountEntity(
-                    username = randomString(),
-                    password = randomString(),
-                )
+        val accounts = (1..100000).map {
+            AccountEntity(
+                username = randomString(),
+                password = randomString(),
             )
         }
+        accountDao.upsert(accounts)
         withContext(Dispatchers.Main) {
             Toast.makeText(context, "Dump done", Toast.LENGTH_SHORT).show()
         }

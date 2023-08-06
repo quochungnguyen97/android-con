@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        private const val TAG = "MainActivity"
+        private const val TAG = "AppMainActivity"
     }
 
     private lateinit var accountDao: AccountDao
@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ list ->
+                Log.i(TAG, "loadData: ${list.size}")
                 adapter.updateList(list)
                 progressBar.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE

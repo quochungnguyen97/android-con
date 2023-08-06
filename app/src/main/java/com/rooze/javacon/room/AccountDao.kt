@@ -9,6 +9,9 @@ interface AccountDao {
     @Upsert
     fun upsert(account: AccountEntity)
 
+    @Upsert
+    fun upsert(accounts: List<AccountEntity>)
+
     @Query("SELECT * FROM account")
     fun getAll(): List<AccountEntity>
 
