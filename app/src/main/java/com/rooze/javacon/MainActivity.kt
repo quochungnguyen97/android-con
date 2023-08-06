@@ -60,7 +60,9 @@ class MainActivity : AppCompatActivity() {
             emitter.onNext(list.take(5))
             SystemClock.sleep(3000)
             emitter.onNext(list)
-        } }.subscribeOn(Schedulers.io())
+        } }.filter { list ->
+            list.size > 10
+        }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ list ->
                 Log.i(TAG, "loadData: ${list.size}")
