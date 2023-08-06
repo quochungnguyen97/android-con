@@ -2,8 +2,7 @@ package com.rooze.javacon
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -12,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rooze.javacon.room.AccountDao
 import com.rooze.javacon.room.AppDatabase
 import com.rooze.javacon.room.dumpData
+import io.reactivex.rxjava3.core.Observable
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -47,14 +47,12 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
-        Thread {
-            val list = accountDao.getAll()
-            Handler(Looper.getMainLooper()).post {
+        Observable.fromCallable { accountDao.getAll() }
+            .subscribe({ list ->
                 adapter.updateList(list)
                 progressBar.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
-            }
-        }.start()
+            }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
