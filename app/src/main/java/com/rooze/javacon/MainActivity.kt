@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rooze.javacon.room.AccountDao
 import com.rooze.javacon.room.AppDatabase
 import com.rooze.javacon.room.dumpData
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -50,11 +52,13 @@ class MainActivity : AppCompatActivity() {
         Observable.create { emitter ->
             emitter.onNext(accountDao.getAll())
             emitter.onComplete()
-        }.subscribe({ list ->
-            adapter.updateList(list)
-            progressBar.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-        }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
+        }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ list ->
+                adapter.updateList(list)
+                progressBar.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
