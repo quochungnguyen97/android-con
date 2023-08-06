@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         val disposable = Observable.create { emitter ->
             emitter.onNext(accountDao.getAll())
             emitter.onComplete()
-        }.subscribeOn(Schedulers.io())
+        }.map { list -> list.take(4) }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ list ->
                 Log.i(TAG, "loadData: ${list.size}")
