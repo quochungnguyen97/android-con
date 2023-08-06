@@ -47,12 +47,14 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
-        Observable.fromCallable { accountDao.getAll() }
-            .subscribe({ list ->
-                adapter.updateList(list)
-                progressBar.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
-            }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
+        Observable.create { emitter ->
+            emitter.onNext(accountDao.getAll())
+            emitter.onComplete()
+        }.subscribe({ list ->
+            adapter.updateList(list)
+            progressBar.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }, { throwable -> Log.e(TAG, "loadData: ", throwable) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
