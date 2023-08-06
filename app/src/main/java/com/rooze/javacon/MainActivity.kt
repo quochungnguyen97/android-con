@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.rooze.javacon.room.AccountDao
+import com.rooze.javacon.room.AccountEntity
 import com.rooze.javacon.room.AppDatabase
 import com.rooze.javacon.room.dumpData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -53,14 +54,27 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
-        val disposable = Observable.create { emitter ->
-            emitter.onNext(accountDao.getAll())
-            emitter.onComplete()
-        }.flatMap { list -> Observable.create { emitter ->
-            emitter.onNext(list.take(5))
-            SystemClock.sleep(3000)
-            emitter.onNext(list)
-        } }.filter { list ->
+        val disposable = Observable.zip(
+            Observable.create<List<AccountEntity>> { emitter ->
+                emitter.onNext(accountDao.getAll())
+                emitter.onComplete()
+            }, Observable.create<List<AccountEntity>> { emitter ->
+                emitter.onNext(accountDao.getAll())
+                emitter.onComplete()
+            }
+        ) { list1, list2 ->
+            if (list1.size > list2.size) {
+                list1
+            } else {
+                list2
+            }
+        }.flatMap { list ->
+            Observable.create { emitter ->
+                emitter.onNext(list.take(5))
+                SystemClock.sleep(3000)
+                emitter.onNext(list)
+            }
+        }.filter { list ->
             list.size > 10
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
